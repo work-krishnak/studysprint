@@ -6,3 +6,5 @@ development happens — not written in advance.
 
 | # | Prompt | What It Did | Targeted |
 |---|---|---|---|
+
+| 1 | "Set up an Express app with a `/api/health` endpoint, plus a server entry point that starts on `process.env.PORT || 3001`." | Created `server/app.js` and `server/server.js`; verified working via browser at `/api/health` | `server/app.js`, `server/server.js` |

@@ -6,7 +6,7 @@
 |---|---|---|
 | Frontend | React (Vite) | Fast dev server, simple build step, matches capstone recommended stack |
 | Backend | Node.js + Express | Simple REST API, huge ecosystem, beginner-friendly |
-| Database | SQLite (via `better-sqlite3`) | Zero infra cost, no separate DB server needed for MVP |
+| Database | SQLite (via Node.js built-in `node:sqlite`) | Zero infra cost; avoids native compilation issues with `better-sqlite3` on Windows (no Visual Studio Build Tools required) — decision made after a real install failure during Phase 5 |
 | Auth | `bcrypt` password hashing + `express-session` signed cookies | No external provider needed; standard for server-rendered/API session auth |
 | Charts | Recharts | React-native charting library, matches PRD requirement |
 | CSV export | Backend-generated (`json2csv` or manual string building) | Reuses existing filter logic; single source of truth |
