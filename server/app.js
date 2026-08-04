@@ -4,6 +4,7 @@ const session = require('express-session');
 require('./db/db');
 
 const authRoutes = require('./routes/auth.routes');
+const assignmentsRoutes = require('./routes/assignments.routes');
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/assignments', assignmentsRoutes);
 
 module.exports = app;
