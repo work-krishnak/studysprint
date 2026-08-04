@@ -18,4 +18,13 @@ export const api = {
   login: (payload) => request('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
   logout: () => request('/auth/logout', { method: 'POST' }),
   me: () => request('/auth/me'),
+
+  getAssignments: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/assignments${query ? `?${query}` : ''}`);
+  },
+  createAssignment: (payload) => request('/assignments', { method: 'POST', body: JSON.stringify(payload) }),
+  updateAssignment: (id, payload) => request(`/assignments/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+  updateStatus: (id, status) => request(`/assignments/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  deleteAssignment: (id) => request(`/assignments/${id}`, { method: 'DELETE' }),
 };
