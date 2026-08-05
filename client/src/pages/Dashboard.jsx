@@ -34,7 +34,7 @@ function Dashboard() {
         <Link to="/assignments">Go to Assignments</Link>
       </div>
 
-      <div style={{ display: 'flex', gap: 16, margin: '24px 0' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, margin: '24px 0' }}>
         <KpiCard label="Total" value={kpis.total} />
         <KpiCard label="Overdue" value={kpis.overdue} color="#c0392b" />
         <KpiCard label="Due This Week" value={kpis.dueThisWeek} color="#d68910" />
@@ -61,7 +61,7 @@ function Dashboard() {
 
 function KpiCard({ label, value, color = '#333' }) {
   return (
-    <div style={{ flex: 1, padding: 16, border: '1px solid #ddd', borderRadius: 8, textAlign: 'center' }}>
+    <div style={{ flex: '1 1 140px', minWidth: 140, padding: 16, border: '1px solid #ddd', borderRadius: 8, textAlign: 'center', boxSizing: 'border-box' }}>
       <div style={{ fontSize: 28, fontWeight: 'bold', color }}>{value}</div>
       <div style={{ color: '#666' }}>{label}</div>
     </div>

@@ -6,6 +6,7 @@ function Assignments() {
   const [assignments, setAssignments] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const [title, setTitle] = useState('');
   const [courseName, setCourseName] = useState('');
@@ -19,6 +20,7 @@ function Assignments() {
 
   async function loadAssignments() {
     setLoading(true);
+    setError('');
     try {
       const params = {};
       if (filterCourse) params.course = filterCourse;
@@ -42,25 +44,18 @@ function Assignments() {
   async function handleCreate(e) {
     e.preventDefault();
     setError('');
+    setActionLoading(true);
     try {
       await api.createAssignment({ title, course_name: courseName, due_date: dueDate, priority });
       setTitle('');
       setCourseName('');
       setDueDate('');
       setPriority('Medium');
-      loadAssignments();
+      await loadAssignments();
     } catch (err) {
       setError(err.message);
-    }
-  }
-
-  async function handleToggleComplete(assignment) {
-    const newStatus = assignment.status === 'Complete' ? 'Not Started' : 'Complete';
-    try {
-      await api.updateStatus(assignment.id, newStatus);
-      loadAssignments();
-    } catch (err) {
-      setError(err.message);
+    } finally {
+      setActionLoading(false);
     }
   }
 
@@ -72,53 +67,70 @@ function Assignments() {
     api.exportAssignmentsCsv(params);
   }
 
-  async function handleDelete(id) {
+  async function handleToggleComplete(assignment) {
+    const newStatus = assignment.status === 'Complete' ? 'Not Started' : 'Complete';
+    setActionLoading(true);
     try {
-      await api.deleteAssignment(id);
-      loadAssignments();
+      await api.updateStatus(assignment.id, newStatus);
+      await loadAssignments();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleDelete(id) {
+    setActionLoading(true);
+    try {
+      await api.deleteAssignment(id);
+      await loadAssignments();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
     }
   }
 
   return (
-    <div style={{ maxWidth: 900, margin: '40px auto', fontFamily: 'sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+    <div style={{ maxWidth: 900, margin: '40px auto', fontFamily: 'sans-serif', padding: '0 16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
         <h1>Assignments</h1>
         <div>
-          <button onClick={handleExport} style={{ marginRight: 12 }}>Export CSV</button>
+          <button onClick={handleExport} disabled={actionLoading} style={{ marginRight: 12 }}>Export CSV</button>
           <Link to="/dashboard">Dashboard</Link>
         </div>
       </div>
 
       <form onSubmit={handleCreate} style={{ marginBottom: 24, padding: 16, border: '1px solid #ccc' }}>
         <h3>New Assignment</h3>
-        <input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required style={{ marginRight: 8 }} />
-        <input placeholder="Course name" value={courseName} onChange={(e) => setCourseName(e.target.value)} required style={{ marginRight: 8 }} />
-        <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required style={{ marginRight: 8 }} />
-        <select value={priority} onChange={(e) => setPriority(e.target.value)} style={{ marginRight: 8 }}>
-          <option value="High">High</option>
-          <option value="Medium">Medium</option>
-          <option value="Low">Low</option>
-        </select>
-        <button type="submit">Add</button>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <input placeholder="Course name" value={courseName} onChange={(e) => setCourseName(e.target.value)} required />
+          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
+          <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+          <button type="submit" disabled={actionLoading}>{actionLoading ? 'Saving...' : 'Add'}</button>
+        </div>
       </form>
 
-      <div style={{ marginBottom: 16, padding: 12, background: '#f5f5f5' }}>
-        <strong>Filters: </strong>
+      <div style={{ marginBottom: 16, padding: 12, background: '#f5f5f5', display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+        <strong>Filters:</strong>
         <input
           placeholder="Filter by course"
           value={filterCourse}
           onChange={(e) => setFilterCourse(e.target.value)}
-          style={{ marginRight: 8 }}
         />
-        <select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)} style={{ marginRight: 8 }}>
+        <select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
           <option value="">All Priorities</option>
           <option value="High">High</option>
           <option value="Medium">Medium</option>
           <option value="Low">Low</option>
         </select>
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ marginRight: 8 }}>
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
           <option value="">All Statuses</option>
           <option value="Not Started">Not Started</option>
           <option value="In Progress">In Progress</option>
@@ -128,43 +140,46 @@ function Assignments() {
           <option value="due_date">Sort by Due Date</option>
           <option value="priority">Sort by Priority</option>
         </select>
+        {loading && <span style={{ color: '#888' }}>Refreshing...</span>}
       </div>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {loading ? (
-        <p>Loading...</p>
+        <p>Loading assignments...</p>
       ) : assignments.length === 0 ? (
         <p>No assignments match your filters.</p>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '2px solid #333' }}>
-              <th>Title</th>
-              <th>Course</th>
-              <th>Due Date</th>
-              <th>Priority</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {assignments.map((a) => (
-              <tr key={a.id} style={{ borderBottom: '1px solid #eee' }}>
-                <td>{a.title}</td>
-                <td>{a.course_name}</td>
-                <td>{a.due_date}</td>
-                <td>{a.priority}</td>
-                <td>{a.status}</td>
-                <td>
-                  <button onClick={() => handleToggleComplete(a)} style={{ marginRight: 8 }}>
-                    {a.status === 'Complete' ? 'Undo' : 'Complete'}
-                  </button>
-                  <button onClick={() => handleDelete(a.id)}>Delete</button>
-                </td>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
+            <thead>
+              <tr style={{ textAlign: 'left', borderBottom: '2px solid #333' }}>
+                <th>Title</th>
+                <th>Course</th>
+                <th>Due Date</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {assignments.map((a) => (
+                <tr key={a.id} style={{ borderBottom: '1px solid #eee' }}>
+                  <td>{a.title}</td>
+                  <td>{a.course_name}</td>
+                  <td>{a.due_date}</td>
+                  <td>{a.priority}</td>
+                  <td>{a.status}</td>
+                  <td>
+                    <button onClick={() => handleToggleComplete(a)} disabled={actionLoading} style={{ marginRight: 8 }}>
+                      {a.status === 'Complete' ? 'Undo' : 'Complete'}
+                    </button>
+                    <button onClick={() => handleDelete(a.id)} disabled={actionLoading}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

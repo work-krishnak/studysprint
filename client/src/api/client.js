@@ -1,17 +1,23 @@
 const BASE_URL = '/api';
 
 async function request(path, options = {}) {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data.message || 'Something went wrong.');
+    let res;
+    try {
+      res = await fetch(`${BASE_URL}${path}`, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        ...options,
+      });
+    } catch (networkErr) {
+      throw new Error('Unable to reach the server. Please check your connection and try again.');
+    }
+  
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.message || 'Something went wrong. Please try again.');
+    }
+    return data;
   }
-  return data;
-}
 
 export const api = {
   register: (payload) => request('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
