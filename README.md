@@ -2,6 +2,8 @@
 
 StudySprint is a personal learning and assignment tracker that helps students organize coursework in one place. Users can register and log in, create assignments with due dates and priorities, filter and sort their workload, view dashboard KPIs and completion trends, and export assignments to CSV.
 
+**Live app:** https://studysprint-production-1647.up.railway.app
+
 ## Tech Stack
 
 ### Frontend (`client/`)
@@ -154,14 +156,12 @@ This runs unit tests (service layer) and integration tests (HTTP endpoints via S
 
 ## Deployment
 
-There is no deployment configuration checked into this repository (no Dockerfile, Railway config, etc.). Project documentation describes a planned **single-service Railway deployment**:
+Deployed as a single service on Railway using the `Dockerfile` at the project root:
 
-1. Build the React app: `npm run build` in `client/` (outputs to `client/dist/`)
-2. Configure Express to serve `client/dist/` as static files alongside the `/api/*` routes from one process
-3. Set environment variables on the host — at minimum `SESSION_SECRET` and `PORT` (Railway provides `PORT` automatically)
-4. Deploy via Railway using Docker or Nixpacks auto-detection
-
-Until static-file serving is added to the Express app, production deployment requires serving the frontend and API separately or completing that integration step.
+1. The Docker image builds the React frontend (`client/`) and installs backend dependencies (`server/`)
+2. Express (`server/app.js`) serves the built frontend as static files and handles all `/api/*` routes from the same process
+3. Environment variables set on Railway: `PORT`, `SESSION_SECRET`
+4. Live at: https://studysprint-production-1647.up.railway.app
 
 ## API Overview
 
