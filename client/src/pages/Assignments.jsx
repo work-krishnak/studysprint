@@ -12,10 +12,21 @@ function Assignments() {
   const [dueDate, setDueDate] = useState('');
   const [priority, setPriority] = useState('Medium');
 
+  const [filterCourse, setFilterCourse] = useState('');
+  const [filterPriority, setFilterPriority] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [sortBy, setSortBy] = useState('due_date');
+
   async function loadAssignments() {
     setLoading(true);
     try {
-      const data = await api.getAssignments();
+      const params = {};
+      if (filterCourse) params.course = filterCourse;
+      if (filterPriority) params.priority = filterPriority;
+      if (filterStatus) params.status = filterStatus;
+      if (sortBy) params.sort = sortBy;
+
+      const data = await api.getAssignments(params);
       setAssignments(data.assignments);
     } catch (err) {
       setError(err.message);
@@ -26,7 +37,7 @@ function Assignments() {
 
   useEffect(() => {
     loadAssignments();
-  }, []);
+  }, [filterCourse, filterPriority, filterStatus, sortBy]);
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -63,7 +74,7 @@ function Assignments() {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: '40px auto', fontFamily: 'sans-serif' }}>
+    <div style={{ maxWidth: 900, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <h1>Assignments</h1>
         <Link to="/dashboard">Dashboard</Link>
@@ -82,11 +93,37 @@ function Assignments() {
         <button type="submit">Add</button>
       </form>
 
+      <div style={{ marginBottom: 16, padding: 12, background: '#f5f5f5' }}>
+        <strong>Filters: </strong>
+        <input
+          placeholder="Filter by course"
+          value={filterCourse}
+          onChange={(e) => setFilterCourse(e.target.value)}
+          style={{ marginRight: 8 }}
+        />
+        <select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)} style={{ marginRight: 8 }}>
+          <option value="">All Priorities</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ marginRight: 8 }}>
+          <option value="">All Statuses</option>
+          <option value="Not Started">Not Started</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Complete">Complete</option>
+        </select>
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="due_date">Sort by Due Date</option>
+          <option value="priority">Sort by Priority</option>
+        </select>
+      </div>
+
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {loading ? (
         <p>Loading...</p>
       ) : assignments.length === 0 ? (
-        <p>No assignments yet. Add one above.</p>
+        <p>No assignments match your filters.</p>
       ) : (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
