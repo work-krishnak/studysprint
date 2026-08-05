@@ -2,7 +2,7 @@ const { DatabaseSync } = require('node:sqlite');
 const fs = require('fs');
 const path = require('path');
 
-const dbPath = path.join(__dirname, 'studysprint.db');
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'studysprint.db');
 const db = new DatabaseSync(dbPath);
 
 const schemaPath = path.join(__dirname, 'schema.sql');

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
+const path = require('path');
 require('./db/db');
 
 const authRoutes = require('./routes/auth.routes');
@@ -26,5 +27,18 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/assignments', assignmentsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+
+// Serve the built React frontend in production
+const clientDistPath = path.join(__dirname, '..', 'client', 'dist');
+app.use(express.static(clientDistPath));
+
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.join(clientDistPath, 'index.html'));
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ message: 'Something went wrong on our end. Please try again.' });
+});
 
 module.exports = app;
