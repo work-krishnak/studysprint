@@ -64,6 +64,14 @@ function Assignments() {
     }
   }
 
+  function handleExport() {
+    const params = {};
+    if (filterCourse) params.course = filterCourse;
+    if (filterPriority) params.priority = filterPriority;
+    if (filterStatus) params.status = filterStatus;
+    api.exportAssignmentsCsv(params);
+  }
+
   async function handleDelete(id) {
     try {
       await api.deleteAssignment(id);
@@ -77,7 +85,10 @@ function Assignments() {
     <div style={{ maxWidth: 900, margin: '40px auto', fontFamily: 'sans-serif' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <h1>Assignments</h1>
-        <Link to="/dashboard">Dashboard</Link>
+        <div>
+          <button onClick={handleExport} style={{ marginRight: 12 }}>Export CSV</button>
+          <Link to="/dashboard">Dashboard</Link>
+        </div>
       </div>
 
       <form onSubmit={handleCreate} style={{ marginBottom: 24, padding: 16, border: '1px solid #ccc' }}>

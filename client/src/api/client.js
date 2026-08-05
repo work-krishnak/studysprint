@@ -27,4 +27,11 @@ export const api = {
   updateAssignment: (id, payload) => request(`/assignments/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
   updateStatus: (id, status) => request(`/assignments/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   deleteAssignment: (id) => request(`/assignments/${id}`, { method: 'DELETE' }),
+
+  getDashboard: () => request('/dashboard'),
+
+  exportAssignmentsCsv: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    window.open(`${BASE_URL}/assignments/export${query ? `?${query}` : ''}`, '_blank');
+  },
 };

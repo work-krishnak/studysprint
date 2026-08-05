@@ -5,6 +5,7 @@ require('./db/db');
 
 const authRoutes = require('./routes/auth.routes');
 const assignmentsRoutes = require('./routes/assignments.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 
 const app = express();
 
@@ -24,5 +25,6 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/assignments', assignmentsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 module.exports = app;

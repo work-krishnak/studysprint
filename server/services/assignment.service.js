@@ -49,10 +49,23 @@ function deleteAssignment(userId, id) {
   assignmentRepository.deleteAssignment(id);
 }
 
+function exportAssignmentsCsv(userId, filters) {
+  const assignments = assignmentRepository.findAssignmentsByUser(userId, filters);
+  const headers = ['Title', 'Course', 'Due Date', 'Priority', 'Status'];
+  const rows = assignments.map((a) => [a.title, a.course_name, a.due_date, a.priority, a.status]);
+
+  const escapeCsv = (val) => `"${String(val).replace(/"/g, '""')}"`;
+  const csvLines = [headers.map(escapeCsv).join(',')];
+  rows.forEach((row) => csvLines.push(row.map(escapeCsv).join(',')));
+
+  return csvLines.join('\n');
+}
+
 module.exports = {
   createAssignment,
   getAssignments,
   updateAssignment,
   updateStatus,
   deleteAssignment,
+  exportAssignmentsCsv,
 };

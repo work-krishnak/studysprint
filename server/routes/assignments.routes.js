@@ -6,7 +6,25 @@ const router = express.Router();
 
 router.use(requireAuth);
 
-router.get('/', (req, res) => {
+router.get('/export', (req, res) => {
+    try {
+      const filters = {
+        course: req.query.course,
+        priority: req.query.priority,
+        status: req.query.status,
+        from: req.query.from,
+        to: req.query.to,
+      };
+      const csv = assignmentService.exportAssignmentsCsv(req.session.userId, filters);
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="assignments.csv"');
+      res.status(200).send(csv);
+    } catch (err) {
+      res.status(err.status || 500).json({ message: err.message || 'Something went wrong.' });
+    }
+  });
+  
+  router.get('/', (req, res) => {
   try {
     const filters = {
       course: req.query.course,
